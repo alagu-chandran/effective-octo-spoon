@@ -2,12 +2,119 @@ import os
 from dotenv import load_dotenv
 import requests
 from datetime import datetime, timedelta
+import pyotp
+import json
+import csv
+from time import sleep
+import re
 
 # Only load .env when not running in GitHub Actions
 if not os.getenv("GITHUB_ACTIONS"):
     load_dotenv()  # Loads local secrets from .env
 
 url = os.getenv("URL", "")
+client_id = os.getenv("client_id", "")
+api_key = os.getenv("api_key", "")
+mpin = os.getenv("mpin", "")
+secret_key = os.getenv("secret_key", "")
+jwt_token = ""
+url_1 = os.getenv("url_1", "")
+url_2 = os.getenv("url_2", "")
+previous_day = ""
+
+
+HEADERS = {
+    "Accept": "application/json",
+    "X-UserType": "USER",
+    "X-SourceID": "WEB",
+    "X-ClientLocalIP": "127.0.0.1",
+    "X-ClientPublicIP": "106.193.147.98",
+    "X-MACAddress": "41:ca:37:aa:5d:07",
+    "X-PrivateKey": api_key,
+    "Content-Type": "application/json",
+}
+
+def split_name(key=""):
+
+    # Regex to extract components
+    match = re.match(r"([A-Z]+)(\d{2})([A-Z]{3})(\d{2})(\d+)(CE|PE)", key)
+
+    if match:
+        symbol, day, month_str, year_suffix, strike, option_type = match.groups()
+
+        # Convert to full date format
+        month_map = {
+            "JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6,
+            "JUL": 7, "AUG": 8, "SEP": 9, "OCT": 10, "NOV": 11, "DEC": 12
+        }
+        year_full = 2000 + int(year_suffix)
+        month = month_map[month_str]
+        date_obj = datetime(year_full, month, int(day))
+        formatted_date = date_obj.strftime("%d-%b-%Y")
+
+        return symbol, formatted_date, strike, option_type
+    return ""
+
+
+
+
+def get_data(item = {}, date=""):
+
+    token = list(item.keys())[0]
+
+    payload = {
+    "exchange": "NFO",
+    "symboltoken": f"{token}",
+    "interval": "ONE_DAY",
+    "fromdate": f"{date} 09:15",
+    "todate": f"{date} 15:30"
+    }
+    
+    response = requests.request("POST", url=url_2, headers=HEADERS, data=json.dumps(payload))
+
+    json_response = response.json()
+    
+    json_data = json_response['data'][0] if len(json_response['data']) else ["-","-","-","-","-",0]
+
+    
+    # # 22.05.2025	instrumentType	expiryDate	optionType	strikePrice	openPrice	highPrice	lowPrice	closePrice
+
+    
+    # symbol, formatted_date, strike, option_type = split_name(item["name"])
+    # option_type = "Call" if "CE" in option_type else "Put"
+
+    return {
+        "name":item[token],
+        "token":token,
+        "open":json_data[1],
+        "high":json_data[2],
+        "low":json_data[3],
+        "close":json_data[4],
+        "volume":json_data[5]
+    }
+
+
+
+
+def login_broker():
+        # Generate TOTP
+        totp = pyotp.TOTP(secret_key).now()
+   
+        # Login Request Payload
+        payload = {
+            "clientcode": client_id,
+            "password": mpin,  
+            "totp": totp
+        }
+
+        response = requests.post(url=url_1, json=payload, headers=HEADERS)
+        data = response.json()
+
+        if data.get("status") is True:
+            tokens = data.get("data", {})
+            return tokens.get("jwtToken", "")
+
+    
 
 def get_previous_day():
     # Get the current date
@@ -80,12 +187,31 @@ def main():
 
         result_tokens = get_tokens_for_next_expiry(index_options)
 
-        print(f"Total instruments need to be processed..{len(result_tokens)}")
+        print(f"Total instruments needed to be processed..{len(result_tokens)}")
 
+        jwt_token = login_broker()
+        HEADERS.update({"Authorization": f"Bearer {jwt_token}"})
+
+        output_dump = []
+        sleep(1)
+        incremental_sleep = 1
         for item in result_tokens:
             print(f"Processing item: {item}")
-        
+            output_dump.append(get_data(item=item, date=previous_day))
+            sleep(incremental_sleep)
+            # incremental_sleep = incremental_sleep + 0.1
+        sorted_data_desc = sorted(output_dump, key=lambda x: x['volume'], reverse=True)
 
+        field_names = []
+
+        with open(f"{previous_day}.csv", mode="w+", newline="") as csv_out:
+            writer = csv.DictWriter(csv_out, fieldnames=list(sorted_data_desc[0].keys()))
+            writer.writeheader()
+            writer.writerows(sorted_data_desc)
+        
+        print("File Written Successfully....")
+            
+        
 
     except requests.RequestException as e:
         print(f"Failed to fetch data: {e}")
