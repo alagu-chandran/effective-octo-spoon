@@ -196,15 +196,17 @@ def main():
 
         output_dump = []
         sleep(1)
-        incremental_sleep = 1
+
+        date_obj = datetime.strptime(previous_day, "%Y-%m-%d")
+        column_header = date_obj.strftime("%d.%m.%Y")
         for item in result_tokens:
             print(f"Processing item: {item}")
-            output_dump.append(get_data(item=item, date=previous_day))
-            sleep(incremental_sleep)
-            # incremental_sleep = incremental_sleep + 0.1
+            output_dump.append(get_data(item=item, date=column_header))
+            sleep(1)
+
         sorted_data_desc = sorted(output_dump, key=lambda x: x['volume'], reverse=True)
 
-        field_names = [f"{previous_day}", "instrumentType",	"expiryDate","optionType", "strikePrice","openPrice","highPrice","lowPrice","closePrice","volume","name","token"]
+        field_names = [f"{column_header}", "instrumentType",	"expiryDate","optionType", "strikePrice","openPrice","highPrice","lowPrice","closePrice","volume","name","token"]
 
         with open(f"{previous_day}.csv", mode="w+", newline="") as csv_out:
             writer = csv.DictWriter(csv_out, fieldnames=field_names)
