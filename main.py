@@ -88,6 +88,8 @@ def get_data(item = {}, date=""):
     }
     
     response = requests.request("POST", url=url_2, headers=HEADERS, data=json.dumps(payload))
+    
+    print(response.text)
 
     json_response = response.json()
     
@@ -95,6 +97,8 @@ def get_data(item = {}, date=""):
     
     symbol, formatted_date, strike, option_type = split_name(item[token])
     option_type = "Call" if "CE" in option_type else "Put"
+
+    print("---------------")
 
     return {
 
