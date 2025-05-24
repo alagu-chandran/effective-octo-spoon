@@ -1,1 +1,1 @@
-"# effective-octo-spoon" 
+# effective-octo-spoon
