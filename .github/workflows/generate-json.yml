@@ -18,6 +18,14 @@ jobs:
         with:
           python-version: '3.12.3'
           cache: 'pip'
+        env:
+          URL: ${{ secrets.URL }}
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          API_KEY: ${{ secrets.API_KEY }}
+          MPIN: ${{ secrets.MPIN }}
+          SECRET_KEY: ${{ secrets.SECRET_KE }}
+          URL_1: ${{ secrets.URL_1 }}
+          URL_2: ${{ secrets.URL_2 }}
         
 
       - name: Run Python Script
