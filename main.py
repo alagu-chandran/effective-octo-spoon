@@ -75,22 +75,24 @@ def get_data(item = {}, date=""):
     json_response = response.json()
     
     json_data = json_response['data'][0] if len(json_response['data']) else ["-","-","-","-","-",0]
-
     
-    # # 22.05.2025	instrumentType	expiryDate	optionType	strikePrice	openPrice	highPrice	lowPrice	closePrice
-
-    
-    # symbol, formatted_date, strike, option_type = split_name(item["name"])
-    # option_type = "Call" if "CE" in option_type else "Put"
+    symbol, formatted_date, strike, option_type = split_name(item[token])
+    option_type = "Call" if "CE" in option_type else "Put"
 
     return {
+
+        f"{date}":f"{strike}{option_type}",
+        "instrumentType":"Index Options",
+        "expiryDate":f"{formatted_date}",
+        "optionType":option_type,
+        "strikePrice":strike,
+        "openPrice":json_data[1],
+        "highPrice":json_data[2],
+        "lowPrice":json_data[3],
+        "closePrice":json_data[4],
+        "volume":json_data[5],
         "name":item[token],
         "token":token,
-        "open":json_data[1],
-        "high":json_data[2],
-        "low":json_data[3],
-        "close":json_data[4],
-        "volume":json_data[5]
     }
 
 
@@ -202,10 +204,10 @@ def main():
             # incremental_sleep = incremental_sleep + 0.1
         sorted_data_desc = sorted(output_dump, key=lambda x: x['volume'], reverse=True)
 
-        field_names = []
+        field_names = [f"{previous_day}", "instrumentType",	"expiryDate","optionType", "strikePrice","openPrice","highPrice","lowPrice","closePrice","volume","name","token"]
 
         with open(f"{previous_day}.csv", mode="w+", newline="") as csv_out:
-            writer = csv.DictWriter(csv_out, fieldnames=list(sorted_data_desc[0].keys()))
+            writer = csv.DictWriter(csv_out, fieldnames=field_names)
             writer.writeheader()
             writer.writerows(sorted_data_desc)
         
