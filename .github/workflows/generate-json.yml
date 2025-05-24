@@ -8,6 +8,14 @@ on:
 jobs:
   generate-j1:
     runs-on: ubuntu-latest
+    env:
+      URL: ${{ secrets.URL }}
+      CLIENT_ID: ${{ secrets.CLIENT_ID }}
+      API_KEY: ${{ secrets.API_KEY }}
+      MPIN: ${{ secrets.MPIN }}
+      SECRET_KEY: ${{ secrets.SECRET_KE }}
+      URL_1: ${{ secrets.URL_1 }}
+      URL_2: ${{ secrets.URL_2 }}
 
     steps:
       - name: Checkout Repository
@@ -17,16 +25,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.12.3'
-          cache: 'pip'
-        env:
-          URL: ${{ secrets.URL }}
-          CLIENT_ID: ${{ secrets.CLIENT_ID }}
-          API_KEY: ${{ secrets.API_KEY }}
-          MPIN: ${{ secrets.MPIN }}
-          SECRET_KEY: ${{ secrets.SECRET_KE }}
-          URL_1: ${{ secrets.URL_1 }}
-          URL_2: ${{ secrets.URL_2 }}
-        
+          cache: 'pip'        
 
       - name: Run Python Script
         run: |
