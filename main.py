@@ -227,16 +227,24 @@ def main():
 
         sorted_data_desc = sorted(output_dump, key=lambda x: x['volume'], reverse=True)
 
-        field_names = [f"{column_header}", "instrumentType",	"expiryDate","optionType", "strikePrice","openPrice","highPrice","lowPrice","closePrice","volume","name","token"]
+        # field_names = [f"{column_header}", "instrumentType",	"expiryDate","optionType", "strikePrice","openPrice","highPrice","lowPrice","closePrice","volume","name","token"]
 
-        with open(f"{previous_day}.csv", mode="w+", newline="") as csv_out:
-            writer = csv.DictWriter(csv_out, fieldnames=field_names)
-            writer.writeheader()
-            writer.writerows(sorted_data_desc)
+        # with open(f"{previous_day}.csv", mode="w+", newline="") as csv_out:
+        #     writer = csv.DictWriter(csv_out, fieldnames=field_names)
+        #     writer.writeheader()
+        #     writer.writerows(sorted_data_desc)
         
-        print("File Written Successfully....")
-            
-        
+
+        # Create folders if they don't exist
+        folder = "nifty"
+        os.makedirs(folder, exist_ok=True)
+
+        file_path = os.path.join(folder, f"{previous_day}.json")
+
+        with open(file_path, "w+") as f:
+            json.dump(data, f)
+
+        print("File created at:", file_path)
 
     except requests.RequestException as e:
         print(f"Failed to fetch data: {e}")
