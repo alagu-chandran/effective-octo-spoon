@@ -75,7 +75,7 @@ def split_name(key=""):
 
 
 
-def get_data(item = {}, date=""):
+def get_data(item = {}, column_header = "",date=""):
 
     token = list(item.keys())[0]
 
@@ -102,7 +102,7 @@ def get_data(item = {}, date=""):
 
     return {
 
-        f"{date}":f"{strike}{option_type}",
+        f"{column_header}":f"{strike}{option_type}",
         "instrumentType":"Index Options",
         "expiryDate":f"{formatted_date}",
         "optionType":option_type,
@@ -222,7 +222,7 @@ def main():
         column_header = date_obj.strftime("%d.%m.%Y")
         for item in result_tokens:
             print(f"Processing item: {item}")
-            output_dump.append(get_data(item=item, date=column_header))
+            output_dump.append(get_data(item=item, column_header=column_header, date=previous_day))
             sleep(1)
 
         sorted_data_desc = sorted(output_dump, key=lambda x: x['volume'], reverse=True)
