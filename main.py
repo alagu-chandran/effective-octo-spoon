@@ -102,7 +102,7 @@ def get_data(item = {}, column_header = "",date=""):
 
     return {
 
-        f"{column_header}":f"{strike}{option_type}",
+        f"{column_header}":f"{option_type}{strike}",
         "instrumentType":"Index Options",
         "expiryDate":f"{formatted_date}",
         "optionType":option_type,
@@ -242,7 +242,7 @@ def main():
         file_path = os.path.join(folder, f"{previous_day}.json")
 
         with open(file_path, "w+") as f:
-            json.dump(data, f)
+            json.dump(sorted_data_desc, f)
 
         print("File created at:", file_path)
 
