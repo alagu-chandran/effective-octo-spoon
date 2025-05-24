@@ -1,0 +1,31 @@
+name: Generate JSON
+
+on:
+  schedule:
+    - cron: '0 20 * * *'
+  workflow_dispatch:
+
+jobs:
+  generate-j1:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.3'
+          cache: 'pip'
+        
+
+      - name: Run Python Script
+        run: |
+          git config --global user.email "alaguku02@mail.com"
+          git config --global user.name "Alagu Karuppiah"
+          pip install -r requirements.txt
+          python main.py
+          git add .
+          git commit -m "Update JSON file"
+          git push
