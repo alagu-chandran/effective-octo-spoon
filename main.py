@@ -11,15 +11,32 @@ import re
 # Only load .env when not running in GitHub Actions
 if not os.getenv("GITHUB_ACTIONS"):
     load_dotenv()  # Loads local secrets from .env
+else:
+    print("Loaded from GitHub Actions")
 
 url = os.getenv("URL", "")
-client_id = os.getenv("client_id", "")
-api_key = os.getenv("api_key", "")
-mpin = os.getenv("mpin", "")
-secret_key = os.getenv("secret_key", "")
+print(f"URL LOADED: {bool(url)}")
+
+client_id = os.getenv("CLIENT_ID", "")
+print(f"Client ID LOADED: {bool(client_id)}")
+
+api_key = os.getenv("API_KEY", "")
+print(f"API KEY LOADED: {bool(api_key)}")
+
+mpin = os.getenv("MPIN", "")
+print(f"MPIN LOADED: {bool(mpin)}")
+
+secret_key = os.getenv("SECRET_KEY", "")
+print(f"SECRET_KEY LOADED: {bool(secret_key)}")
+
 jwt_token = ""
-url_1 = os.getenv("url_1", "")
-url_2 = os.getenv("url_2", "")
+
+url_1 = os.getenv("URL_1", "")
+print(f"URL-1 LOADED: {bool(url_1)}")
+
+url_2 = os.getenv("URL_2", "")
+print(f"URL-2 LOADED: {bool(url_2)}")
+
 previous_day = ""
 
 
