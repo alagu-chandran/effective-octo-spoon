@@ -144,7 +144,10 @@ def get_previous_day():
     current_date = datetime.now()
 
     # Calculate the previous day
-    previous_day = current_date - timedelta(days=1)
+    if not os.getenv("GITHUB_ACTIONS"):
+        previous_day = current_date - timedelta(days=1)
+    else:
+        previous_day = current_date
 
     previous_day_formatted = previous_day.strftime("%Y-%m-%d")
 
