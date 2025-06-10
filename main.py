@@ -2,9 +2,10 @@ import os
 from dotenv import load_dotenv
 import requests
 from datetime import datetime, timedelta
+import pytz
 import pyotp
 import json
-import csv
+# import csv
 from time import sleep
 import re
 
@@ -50,6 +51,9 @@ HEADERS = {
     "X-PrivateKey": api_key,
     "Content-Type": "application/json",
 }
+
+def ist_now():
+    return datetime.now(pytz.timezone("Asia/Kolkata"))
 
 def split_name(key=""):
 
@@ -141,20 +145,21 @@ def login_broker():
 
 def get_previous_day():
     # Get the current date
-    current_date = datetime.now()
+    current_date = ist_now()
 
     # Calculate the previous day
-    if not os.getenv("GITHUB_ACTIONS"):
-        previous_day = current_date - timedelta(days=1)
-    else:
-        previous_day = current_date
+    # if not os.getenv("GITHUB_ACTIONS"):
+    #     previous_day = current_date - timedelta(days=1)
+    # else:
+    #     previous_day = current_date
+    previous_day = current_date - timedelta(days=1)
 
     previous_day_formatted = previous_day.strftime("%Y-%m-%d")
 
     return previous_day_formatted
 
 def get_tokens_for_next_expiry(data):
-    today = datetime.now().date()
+    today = ist_now().date()
 
     # Step 1: Extract and sort unique expiry dates
     expiries = []
