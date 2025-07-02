@@ -79,7 +79,7 @@ def split_name(key=""):
 
 
 
-def get_data(item = {}, column_header = "",date=""):
+def get_data(item = {}, column_header = "",date="", retry=0):
 
     token = list(item.keys())[0]
 
@@ -96,8 +96,17 @@ def get_data(item = {}, column_header = "",date=""):
     print(response.text)
 
     json_response = response.json()
-    
-    json_data = json_response['data'][0] if len(json_response['data']) else ["-","-","-","-","-",0]
+    # {"message":"Something Went Wrong, Please Try After Sometime","errorcode":"AB1004","status":false,"data":null}
+
+    json_data = ["-","-","-","-","-",0]
+    if json_response['message'] == "SUCCESS":
+        json_data = json_response['data'][0] if len(json_response['data']) else ["-","-","-","-","-",0]
+    elif retry < 3:
+        retry += 1
+        sleep(1)
+        print(f"Retrying..{retry}")
+        return get_data(item=item, column_header=column_header, date=date, retry=retry)
+
     
     symbol, formatted_date, strike, option_type = split_name(item[token])
     option_type = "Call" if "CE" in option_type else "Put"
