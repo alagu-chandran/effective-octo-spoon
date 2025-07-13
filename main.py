@@ -231,7 +231,7 @@ def main():
         for item in result_tokens:
             print(f"Processing item: {item}")
             output_dump.append(get_data(item=item, column_header=column_header, date=previous_day))
-            sleep(1)
+            sleep(2)
 
         sorted_data_desc = sorted(output_dump, key=lambda x: x['volume'], reverse=True)
 
