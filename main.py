@@ -79,7 +79,7 @@ def split_name(key=""):
 
 
 
-def get_data(item = {}, column_header = "",date=""):
+def get_data(item = {}, column_header = "",date2="", date1=""):
 
     token = list(item.keys())[0]
 
@@ -87,8 +87,8 @@ def get_data(item = {}, column_header = "",date=""):
     "exchange": "NFO",
     "symboltoken": f"{token}",
     "interval": "ONE_DAY",
-    "fromdate": f"{date} 09:15",
-    "todate": f"{date} 15:30"
+    "fromdate": f"{date1} 09:15",
+    "todate": f"{date2} 15:30"
     }
     
     response = requests.request("POST", url=url_2, headers=HEADERS, data=json.dumps(payload))
@@ -154,9 +154,13 @@ def get_previous_day():
     #     previous_day = current_date
     previous_day = current_date - timedelta(days=1)
 
+    day_previous_day = current_date - timedelta(days=2)
+
     previous_day_formatted = previous_day.strftime("%Y-%m-%d")
 
-    return previous_day_formatted
+    day_previous_day_formatted = day_previous_day.strftime("%Y-%m-%d")
+
+    return previous_day_formatted, day_previous_day_formatted
 
 def get_tokens_for_next_expiry(data):
     today = ist_now().date()
@@ -192,7 +196,7 @@ def main():
 
 
     try:
-        previous_day = get_previous_day()
+        previous_day, day_previous_day = get_previous_day()
         print(f"Getting data for .. {previous_day}")
 
         response = requests.get(url, stream=True)  # Stream response to avoid memory overload
@@ -230,7 +234,7 @@ def main():
         column_header = date_obj.strftime("%d.%m.%Y")
         for item in result_tokens:
             print(f"Processing item: {item}")
-            output_dump.append(get_data(item=item, column_header=column_header, date=previous_day))
+            output_dump.append(get_data(item=item, column_header=column_header, date2=previous_day, date1=day_previous_day))
             sleep(2)
 
         sorted_data_desc = sorted(output_dump, key=lambda x: x['volume'], reverse=True)
