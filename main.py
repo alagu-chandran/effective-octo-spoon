@@ -118,8 +118,11 @@ def get_data(item = {}, column_header = "",date2="", date1=""):
         "volume":json_data[5],
         "name":item[token],
         "token":token,
+        "SR Low -":float(strike)-json_data[3] if json_data[3] != "-"  else "",
+        "SR Low +":float(strike)+json_data[3] if json_data[3] != "-"  else "",
+        "SR PC -":float(strike)-json_data[4] if json_data[4] != "-"  else "",
+        "SR PC +":float(strike)+json_data[4] if json_data[4] != "-"  else ""
     }
-
 
 
 
