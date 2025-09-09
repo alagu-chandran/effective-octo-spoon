@@ -195,7 +195,40 @@ def get_tokens_for_next_expiry(data):
 
     return tokens
 
+def process_fno(instruments, index, folder_name,  previous_day, day_previous_day):
+        index_options = list(filter(lambda opt: opt["exch_seg"] == "NFO" and opt["instrument_type"] == "OPTIDX" and opt["name"] == index, instruments))
+
+        result_tokens = get_tokens_for_next_expiry(index_options)
+
+        print(f"Total instruments needed to be processed..{len(result_tokens)}")
+
+        output_dump = []
+        sleep(1)
+
+        date_obj = datetime.strptime(previous_day, "%Y-%m-%d")
+        column_header = date_obj.strftime("%d.%m.%Y")
+        for item in result_tokens:
+            print(f"Processing item: {item}")
+            output_dump.append(get_data(item=item, column_header=column_header, date2=previous_day, date1=day_previous_day))
+            sleep(2)
+
+        sorted_data_desc = sorted(output_dump, key=lambda x: x['volume'], reverse=True)
+
+        os.makedirs(folder_name, exist_ok=True)
+
+        file_path = os.path.join(folder_name, f"{previous_day}.json")
+
+        with open(file_path, "w+") as f:
+            json.dump(sorted_data_desc, f)
+
+        print("File created at:", file_path)    
+
 def main():
+
+    index = {
+        "NIFTY":"nifty",
+        "BANKNIFTY":"nifty-bank"
+    }
 
 
     try:
@@ -221,45 +254,14 @@ def main():
             for item in data
         ]
 
-        index_options = list(filter(lambda opt: opt["exch_seg"] == "NFO" and opt["instrument_type"] == "OPTIDX" and opt["name"] == "NIFTY", instruments))
-
-        result_tokens = get_tokens_for_next_expiry(index_options)
-
-        print(f"Total instruments needed to be processed..{len(result_tokens)}")
-
         jwt_token = login_broker()
         HEADERS.update({"Authorization": f"Bearer {jwt_token}"})
 
-        output_dump = []
-        sleep(1)
+        for item in index.keys():
+            index[item]
+            process_fno(instruments=instruments,index=item, folder_name = index[item], previous_day=previous_day, day_previous_day=day_previous_day)
 
-        date_obj = datetime.strptime(previous_day, "%Y-%m-%d")
-        column_header = date_obj.strftime("%d.%m.%Y")
-        for item in result_tokens:
-            print(f"Processing item: {item}")
-            output_dump.append(get_data(item=item, column_header=column_header, date2=previous_day, date1=day_previous_day))
-            sleep(2)
 
-        sorted_data_desc = sorted(output_dump, key=lambda x: x['volume'], reverse=True)
-
-        # field_names = [f"{column_header}", "instrumentType",	"expiryDate","optionType", "strikePrice","openPrice","highPrice","lowPrice","closePrice","volume","name","token"]
-
-        # with open(f"{previous_day}.csv", mode="w+", newline="") as csv_out:
-        #     writer = csv.DictWriter(csv_out, fieldnames=field_names)
-        #     writer.writeheader()
-        #     writer.writerows(sorted_data_desc)
-        
-
-        # Create folders if they don't exist
-        folder = "nifty"
-        os.makedirs(folder, exist_ok=True)
-
-        file_path = os.path.join(folder, f"{previous_day}.json")
-
-        with open(file_path, "w+") as f:
-            json.dump(sorted_data_desc, f)
-
-        print("File created at:", file_path)
 
     except requests.RequestException as e:
         print(f"Failed to fetch data: {e}")
